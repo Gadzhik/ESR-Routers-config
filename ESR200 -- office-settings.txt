@@ -1,0 +1,667 @@
+hostname ROU-OFFICE
+
+object-group service telnet
+  port-range ---23
+exit
+object-group service ssh
+  port-range ---22
+exit
+object-group service dhcp_server
+  port-range 67
+exit
+object-group service dhcp_client
+  port-range 68
+exit
+object-group service ntp
+  port-range 123
+exit
+object-group service TRASSIR_PORT
+  port-range 3080-3084
+exit
+object-group service SRV_VOCORD_RDP_1
+  port-range 33389
+exit
+object-group service SRV_VOCORD_RDP_2
+  port-range 33390
+exit
+object-group service SRV_VOCORD_RDP_3
+  port-range 33391
+exit
+object-group service BITRIX24
+  port-range 33399
+exit
+object-group service DEPO_AZIMUT_9080
+  port-range 9080
+exit
+object-group service DEPO_AZIMUT_9025
+  port-range 9025
+exit
+object-group service DEPO_AZIMUT_9022
+  port-range 9022
+exit
+object-group service DEPO_AZIMUT_9443
+  port-range 9443
+exit
+object-group service ASKOZIA_PBX_PORT
+  port-range 5060
+exit
+object-group service vipnet1000
+  port-range 55777
+exit
+object-group service TRASSIR_PORT_3081
+  port-range 3081
+exit
+object-group service TRASSIR_PORT_3082
+  port-range 3082
+exit
+object-group service TRASSIR_PORT_3083
+  port-range 3083
+exit
+object-group service TRASSIR_PORT_3084
+  port-range 3084
+exit
+object-group service TRASSIR_PORT_555
+  port-range 555
+exit
+object-group service TRASSIR_PORT_8080
+  port-range 8080
+exit
+object-group service TRASSIR_PORT_3080
+  port-range 3080
+exit
+object-group service BITRIX24_4080
+  port-range 4080
+exit
+object-group service UDP_PORT_500
+  port-range 500
+exit
+object-group service UDP_PORT_1701
+  port-range 1701
+exit
+object-group service UDP_PORT_4500
+  port-range 4500
+exit
+object-group service esp
+  port-range 50
+exit
+object-group service gre
+  port-range 47
+exit
+object-group service TCP_PORT_1723
+  port-range 1723
+exit
+
+object-group network EXTERNAL_NET
+  ip address-range use-external-IP
+exit
+object-group network INTERNAL_NET
+  ip address-range 192.168.88.99
+exit
+object-group network SERV_IP_1
+  ip address-range 192.168.88.58
+exit
+object-group network SERV_IP_2
+  ip address-range 192.168.88.53
+exit
+object-group network SERV_IP_3
+  ip address-range 192.168.88.79
+exit
+object-group network BITRIX24_NET
+  ip address-range 192.168.88.20
+exit
+object-group network DEPO_NET
+  ip address-range 192.168.88.101
+exit
+object-group network ASKOZIA_NET
+  ip address-range 192.168.88.47
+exit
+object-group network VIPNET_NET
+  ip address-range 192.168.88.2
+exit
+object-group network l2tp_outside
+  ip address-range use-external-IP
+exit
+object-group network l2tp_local
+  ip address-range 10.10.10.1
+exit
+object-group network l2tp_remote
+  ip address-range 10.10.10.3-10.10.10.250
+exit
+object-group network l2tp_dns
+  ip address-range 8.8.8.8
+  ip address-range 8.8.4.4
+exit
+object-group network BITRIX24_NET_88_21
+  ip address-range 192.168.88.21
+exit
+object-group network pptp_outside
+  ip address-range use-external-IP
+exit
+object-group network pptp_local
+  ip address-range 10.10.20.1
+exit
+object-group network pptp_remote
+  ip address-range 10.10.20.5-10.10.20.200
+exit
+object-group network pptp_dns
+  ip address-range 8.8.8.8
+  ip address-range 8.8.4.4
+exit
+object-group network L2TP
+  ip address-range 10.10.10.3-10.10.10.250
+exit
+
+syslog max-files 3
+syslog file-size 512
+syslog file tmpsys:syslog/esr info
+
+username admin
+  password encrypted $6$VmjR.4n.qL14ztAk$hihZf
+exit
+
+vlan 2,2151
+exit
+
+domain lookup enable
+domain name-server 8.8.8.8
+
+security zone trusted
+exit
+security zone untrusted
+exit
+
+bridge 1
+  vlan 1
+  security-zone trusted
+  ip address dhcp
+  ipv6 enable
+  enable
+exit
+bridge 2
+  vlan 2
+  security-zone untrusted
+  ip firewall disable
+  ip address dhcp
+  ipv6 enable
+  enable
+exit
+
+interface gigabitethernet 1/0/1
+  ip address dhcp
+  security-zone untrusted
+exit
+interface gigabitethernet 1/0/2
+  security-zone trusted
+  ip firewall disable
+  ip address 192.168.88.1/24
+exit
+interface gigabitethernet 1/0/3
+  mode switchport
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/4
+  mode switchport
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/5
+  mode switchport
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/6
+  mode switchport
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/7
+  mode switchport
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/8
+  mode switchport
+  security-zone trusted
+exit
+security zone-pair trusted untrusted
+  rule 1
+    action permit
+    enable
+  exit
+exit
+security zone-pair trusted trusted
+  rule 1
+    action permit
+    enable
+  exit
+exit
+security zone-pair trusted self
+  rule 1
+    action permit
+    match protocol tcp
+    match destination-port telnet
+    enable
+  exit
+  rule 10
+    action permit
+    match protocol tcp
+    match destination-port ssh
+    enable
+  exit
+  rule 20
+    action permit
+    match protocol icmp
+    enable
+  exit
+  rule 30
+    action permit
+    match protocol udp
+    match source-port dhcp_client
+    match destination-port dhcp_server
+    enable
+  exit
+  rule 40
+    action permit
+    match protocol udp
+    match destination-port ntp
+    enable
+  exit
+exit
+security zone-pair untrusted self
+  rule 1
+    action permit
+    match protocol udp
+    match source-port dhcp_server
+    match destination-port dhcp_client
+    enable
+  exit
+  rule 2
+    action permit
+    match protocol udp
+    match destination-nat
+    match destination-port UDP_PORT_1701
+    enable
+  exit
+  rule 3
+    action permit
+    match protocol udp
+    match destination-port UDP_PORT_500
+    enable
+  exit
+  rule 4
+    action permit
+    match protocol udp
+    match destination-port UDP_PORT_4500
+    enable
+  exit
+  rule 5
+    action permit
+    match protocol udp
+    match destination-port esp
+    enable
+  exit
+  rule 6
+    action permit
+    match protocol udp
+    match destination-port gre
+    enable
+  exit
+  rule 7
+  exit
+  rule 8
+    action permit
+    match protocol tcp
+    match destination-port TCP_PORT_1723
+    enable
+  exit
+exit
+security zone-pair untrusted trusted
+  rule 1
+    description "The name of SERV_IP_ have name to VOCORD RDP SERVERS"
+    action permit
+    match destination-address SERV_IP_1
+    match destination-nat
+    enable
+  exit
+  rule 2
+    description "The name of SERV_IP_ have name to VOCORD RDP SERVERS"
+    action permit
+    match destination-address SERV_IP_2
+    match destination-nat
+    enable
+  exit
+  rule 3
+    description "The name of SERV_IP_ have name to VOCORD RDP SERVERS"
+    action permit
+    match destination-address SERV_IP_3
+    match destination-nat
+    enable
+  exit
+  rule 4
+    description "Rule for BITRIX24"
+    action permit
+    match destination-address BITRIX24_NET
+    match destination-nat
+    enable
+  exit
+  rule 5
+    description "Rule for DEPO_NET"
+    action permit
+    match destination-address DEPO_NET
+    match destination-nat
+    enable
+  exit
+  rule 6
+    description "Rule INTERNAL_NET have rule for TRASSIR"
+    action permit
+    match destination-address INTERNAL_NET
+    match destination-nat
+    enable
+  exit
+  rule 7
+    description "The rule to ASKOZIA_PBX"
+    action permit
+    match destination-address ASKOZIA_NET
+    match destination-nat
+    enable
+  exit
+  rule 8
+    description "To ViPNet Coordinator1000"
+    action permit
+    match destination-address VIPNET_NET
+    match destination-nat
+    enable
+  exit
+  rule 9
+    description "Rule to BITRIX24_4080_PORT"
+    action permit
+    match destination-address BITRIX24_NET_88_21
+    match destination-nat
+    enable
+  exit
+exit
+
+remote-access pptp remote-office
+  authentication mode local
+  local-address object-group pptp_local
+  remote-address object-group pptp_remote
+  outside-address interface gigabitethernet 1/0/1
+  dns-servers object-group pptp_dns
+  security-zone trusted
+  username derbent
+    password ascii-text encrypted 9DA00E
+    enable
+    remote network 192.168.1.0/24
+  exit
+  enable
+exit
+
+remote-access l2tp remote-users
+  mtu 1450
+  authentication mode local
+  local-address ip-address 10.10.10.1
+  remote-address address-range 10.10.10.3-10.10.10.250
+  outside-address interface gigabitethernet 1/0/8
+  dns-servers object-group l2tp_dns
+  security-zone trusted
+  ipsec authentication method pre-shared-key
+  ipsec authentication pre-shared-key ascii-text encrypted 9DA00E7
+  username derbent
+    password ascii-text encrypted 9DA00E7
+    enable
+    remote network 192.168.1.0/24
+  exit
+  enable
+exit
+
+security passwords history 0
+ip firewall sessions tcp-estabilished-timeout 3600
+ip firewall sessions tracking sip
+
+nat destination
+  pool TRASSIR_POOL
+    ip address 192.168.88.99
+    ip port 3080
+  exit
+  pool VOCORD_POOL_SRV_1
+    ip address 192.168.88.58
+    ip port 3389
+  exit
+  pool VOCORD_POOL_SRV_2
+    ip address 192.168.88.53
+    ip port 3389
+  exit
+  pool VOCORD_POOL_SRV_3
+    ip address 192.168.88.79
+    ip port 3389
+  exit
+  pool BITRIX24_POOL
+    ip address 192.168.88.20
+    ip port 3389
+  exit
+  pool DEPO_POOL_9080_80
+    ip address 192.168.88.101
+    ip port 80
+  exit
+  pool DEPO_POOL_9025_25
+    ip address 192.168.88.101
+    ip port 25
+  exit
+  pool DEPO_POOL_9022_22
+    ip address 192.168.88.101
+    ip port 22
+  exit
+  pool DEPO_POOL_9443_443
+    ip address 192.168.88.101
+    ip port 443
+  exit
+  pool ASKOZIA_POOL
+    ip address 192.168.88.47
+    ip port 5060
+  exit
+  pool VIPNET_POOL
+    ip address 192.168.88.2
+    ip port 55777
+  exit
+  pool TRASSIR_POOL_3081
+    ip address 192.168.88.99
+    ip port 3081
+  exit
+  pool TRASSIR_POOL_3082
+    ip address 192.168.88.99
+    ip port 3082
+  exit
+  pool TRASSIR_POOL_3083
+    ip address 192.168.88.99
+    ip port 3083
+  exit
+  pool TRASSIR_POOL_3084
+    ip address 192.168.88.99
+    ip port 3084
+  exit
+  pool TRASSIR_POOL_555
+    ip address 192.168.88.99
+    ip port 555
+  exit
+  pool TRASSIR_POOL_8080
+    ip address 192.168.88.99
+    ip port 8080
+  exit
+  pool TRASSIR_POOL_3080
+    ip address 192.168.88.99
+    ip port 3080
+  exit
+  pool BITRIX24_4080
+    ip address 192.168.88.21
+    ip port 80
+  exit
+  pool BITRIX24_443
+    ip address 192.168.88.21
+    ip port 443
+  exit
+  pool UDP_POOL_1701
+    ip address 192.168.88.13
+    ip port 1701
+  exit
+  pool UDP_POOL_500
+    ip address 192.168.88.13
+    ip port 500
+  exit
+  pool UDP_POOL_4500
+    ip address 192.168.88.13
+    ip port 4500
+  exit
+  pool UDP_POOL_50
+    ip address 192.168.88.13
+    ip port 50
+  exit
+  pool UDP_POOL_47
+    ip address 192.168.88.13
+    ip port 47
+  exit
+  ruleset DNAT
+    from zone untrusted
+    rule 1
+      match protocol tcp
+      match destination-port SRV_VOCORD_RDP_1
+      action destination-nat pool VOCORD_POOL_SRV_1
+      enable
+    exit
+    rule 2
+      match protocol tcp
+      match destination-port SRV_VOCORD_RDP_2
+      action destination-nat pool VOCORD_POOL_SRV_2
+      enable
+    exit
+    rule 3
+      match protocol tcp
+      match destination-port SRV_VOCORD_RDP_3
+      action destination-nat pool VOCORD_POOL_SRV_3
+      enable
+    exit
+    rule 4
+      match protocol tcp
+      match destination-port TRASSIR_PORT
+      action destination-nat pool TRASSIR_POOL
+      enable
+    exit
+    rule 5
+      match protocol tcp
+      match destination-port BITRIX24
+      action destination-nat pool BITRIX24_POOL
+      enable
+    exit
+    rule 6
+      match protocol tcp
+      match destination-port DEPO_AZIMUT_9080
+      action destination-nat pool DEPO_POOL_9080_80
+      enable
+    exit
+    rule 7
+      match protocol tcp
+      match destination-port DEPO_AZIMUT_9025
+      action destination-nat pool DEPO_POOL_9025_25
+      enable
+    exit
+    rule 8
+      match protocol tcp
+      match destination-port DEPO_AZIMUT_9022
+      action destination-nat pool DEPO_POOL_9022_22
+      enable
+    exit
+    rule 9
+      match protocol tcp
+      match destination-port DEPO_AZIMUT_9443
+      action destination-nat pool DEPO_POOL_9443_443
+      enable
+    exit
+    rule 10
+      description "Rule to ASKOZIA"
+      match protocol udp
+      match destination-port vipnet1000
+      action destination-nat pool VIPNET_POOL
+      enable
+    exit
+    rule 11
+      match protocol tcp
+      match destination-port TRASSIR_PORT_3081
+      action destination-nat pool TRASSIR_POOL_3081
+      enable
+    exit
+    rule 12
+      match protocol tcp
+      match destination-port TRASSIR_PORT_3082
+      action destination-nat pool TRASSIR_POOL_3082
+      enable
+    exit
+    rule 13
+      match protocol tcp
+      match destination-port TRASSIR_PORT_3083
+      action destination-nat pool TRASSIR_POOL_3083
+      enable
+    exit
+    rule 14
+      match protocol tcp
+      match destination-port TRASSIR_PORT_3084
+      action destination-nat pool TRASSIR_POOL_3084
+      enable
+    exit
+    rule 15
+      match protocol tcp
+      match destination-port TRASSIR_PORT_555
+      action destination-nat pool TRASSIR_POOL_555
+      enable
+    exit
+    rule 16
+      match protocol tcp
+      match destination-port TRASSIR_PORT_8080
+      action destination-nat pool TRASSIR_POOL_8080
+      enable
+    exit
+    rule 17
+      match protocol tcp
+      match destination-port TRASSIR_PORT_3080
+      action destination-nat pool TRASSIR_POOL_3080
+      enable
+    exit
+    rule 18
+      match protocol tcp
+      match destination-port BITRIX24_4080
+      action destination-nat pool BITRIX24_4080
+      enable
+    exit
+    rule 19
+      match protocol tcp
+      match destination-port BITRIX24_4080
+      action destination-nat pool BITRIX24_443
+      enable
+    exit
+  exit
+exit
+
+nat source
+  ruleset factory
+    to zone untrusted
+    rule 10
+      description "replace 'source ip' by outgoing interface ip address"
+      action source-nat interface
+      enable
+    exit
+  exit
+exit
+
+nat alg sip
+
+ip dhcp-server
+ip dhcp-server pool Office
+  network 192.168.88.0/24
+  domain-name is05.loc
+  default-lease-time 001:00:00
+  address-range 192.168.88.2-192.168.88.254
+  default-router 192.168.88.1
+  dns-server 8.8.8.8,1.1.1.1
+exit
+
+ip telnet server
+ip telnet port ---23
+ip ssh server
+ip ssh port ---22
+
+ntp enable
+ntp broadcast-client enable

@@ -1,0 +1,320 @@
+hostname ROU-L2TP
+
+
+boot host auto-config
+object-group service telnet
+  port-range 23
+exit
+object-group service ssh
+  port-range 22
+exit
+object-group service dhcp_server
+  port-range 67
+exit
+object-group service dhcp_client
+  port-range 68
+exit
+object-group service ntp
+  port-range 123
+exit
+
+object-group network l2tp_outside
+  ip address-range 217.217.217.217
+exit
+object-group network l2tp_local
+  ip address-range 10.10.10.1
+exit
+object-group network l2tp_remote
+  ip address-range 10.10.10.3-10.10.10.150
+exit
+object-group network l2tp_dns
+  ip address-range 8.8.8.8
+  ip address-range 8.8.4.4
+exit
+
+syslog max-files 3
+syslog file-size 512
+syslog file tmpsys:syslog/default info
+
+radius-server host 192.168.14.2
+  key ascii-text encrypted 8CB5107
+exit
+
+vlan 2
+exit
+
+domain lookup enable
+
+security zone trusted
+exit
+security zone untrusted
+exit
+
+
+bridge 1
+  vlan 1
+  security-zone trusted
+  ip address 192.168.1.1/24
+  ip address 192.168.14.1/24
+  ipv6 enable
+  enable
+exit
+bridge 2
+  vlan 2
+  security-zone untrusted
+  ip address dhcp
+  ipv6 enable
+  enable
+exit
+
+cellular profile 1
+  APN realips.kuban
+  user mts
+  password ascii-text encrypted 91A010
+  allowed-auth pap
+exit
+
+interface gigabitethernet 1/0/1
+  security-zone untrusted
+  switchport access vlan 2
+exit
+interface gigabitethernet 1/0/2
+  security-zone trusted
+  ip firewall disable
+exit
+interface gigabitethernet 1/0/3
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/4
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/5
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/6
+  security-zone untrusted
+  switchport access vlan 2
+exit
+cellular modem 1
+  device 1-2
+  ip firewall disable
+  security-zone untrusted
+  profile 1
+  enable
+exit
+security zone-pair trusted untrusted
+  rule 1
+    action permit
+    match protocol any
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+security zone-pair trusted trusted
+  rule 1
+    action permit
+    match protocol any
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+security zone-pair trusted self
+  rule 1
+    action permit
+    match protocol tcp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port telnet
+    enable
+  exit
+  rule 10
+    action permit
+    match protocol tcp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port ssh
+    enable
+  exit
+  rule 20
+    action permit
+    match protocol icmp
+    match source-address any
+    match destination-address any
+    enable
+  exit
+  rule 30
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port dhcp_client
+    match destination-port dhcp_server
+    enable
+  exit
+  rule 40
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port ntp
+    enable
+  exit
+exit
+security zone-pair untrusted self
+  rule 1
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port dhcp_server
+    match destination-port dhcp_client
+    enable
+  exit
+  rule 20
+    action permit
+    match protocol icmp
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+
+remote-access l2tp remote-workers
+  mtu 1450
+  authentication mode radius
+  local-address ip-address 10.10.10.1
+  outside-address interface modem 1
+  dns-servers object-group l2tp_dns
+  security-zone untrusted
+  ipsec authentication method pre-shared-key
+  ipsec authentication pre-shared-key ascii-text encrypted 9FA1
+  username mmk
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username kks
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username soz
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username edds-drb
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username pmmk-dr
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username gvdh-dr
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username artsk-gb
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username edds-has
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username gvk-has
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username edds-izb
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username vdk-izb
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username edds-bnk
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username vsrs-bnk
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username edds-bab
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username lyux
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username shava
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username hamam
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username gidro
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  username cuks
+    password ascii-text encrypted 8CB5107
+    enable
+  exit
+  enable
+exit
+
+ip firewall sessions tcp-estabilished-timeout 3600
+
+nat source
+  ruleset factory
+    to zone untrusted
+    rule 10
+      description "replace 'source ip' by outgoing interface ip address"
+      match protocol any
+      match source-address any
+      match destination-address any
+      action source-nat interface
+      enable
+    exit
+  exit
+exit
+
+ip dhcp-server
+ip dhcp-server pool lan-pool
+  network 192.168.14.0/24
+  address-range 192.168.14.2-192.168.14.254
+  default-router 192.168.14.1
+exit
+
+ip route 0.0.0.0/0 interface modem 1
+ip route 192.168.19.0/24 10.10.10.1
+ip route 192.168.14.0/24 10.10.10.1
+ip route 192.168.200.0/24 10.10.10.1
+ip route 192.168.17.0/24 10.10.10.1
+ip route 192.168.21.0/24 10.10.10.1
+ip route 192.168.25.0/24 10.10.10.1
+ip route 192.168.16.0/24 10.10.10.1
+ip route 192.168.26.0/24 10.10.10.1
+ip route 192.168.23.0/24 10.10.10.1
+ip route 192.168.20.0/24 10.10.10.1
+ip route 192.168.32.0/24 10.10.10.1
+ip route 192.168.15.0/24 10.10.10.1
+ip route 192.168.31.0/24 10.10.10.1
+ip route 192.168.30.0/24 10.10.10.1
+ip route 192.168.28.0/24 10.10.10.1
+ip route 192.168.10.0/24 10.10.10.1
+
+ip telnet server
+ip ssh server
+
+ntp enable
+ntp broadcast-client enable
