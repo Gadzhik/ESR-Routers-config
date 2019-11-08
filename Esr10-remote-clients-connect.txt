@@ -1,0 +1,327 @@
+hostname ROU-MAIN
+
+tech-support login enable
+root login enable
+
+boot host auto-config
+object-group service telnet
+  port-range 23
+exit
+object-group service ssh
+  port-range 22
+  port-range 65022
+exit
+object-group service dhcp_server
+  port-range 67
+exit
+object-group service dhcp_client
+  port-range 68
+exit
+object-group service ntp
+  port-range 123
+exit
+
+object-group network l2tp_outside
+  ip address-range 203.0.113.10
+exit
+object-group network l2tp_local
+  ip address-range 10.77.10.1
+exit
+object-group network l2tp_remote
+  ip address-range 10.77.10.3-10.77.10.150
+exit
+object-group network l2tp_dns
+  ip address-range 8.8.8.8
+  ip address-range 8.8.4.4
+exit
+
+syslog max-files 3
+syslog file-size 512
+syslog file tmpsys:syslog/default info
+
+username admin
+  password encrypted
+D2AvmiFYn0UTXBKQBINET0Td4gCVtE1XJm2PdeKgLDvsnFn5Gvxd4vBftiY0mVBTxX1
+exit
+
+vlan 2
+exit
+
+domain lookup enable
+
+security zone trusted
+exit
+security zone untrusted
+exit
+
+
+bridge 1
+  vlan 1
+  security-zone trusted
+  ip address 172.20.14.1/24
+  ipv6 enable
+  enable
+exit
+bridge 2
+  vlan 2
+  security-zone untrusted
+  ip firewall disable
+  ip address dhcp
+  ipv6 enable
+  enable
+exit
+
+cellular profile 1
+  APN realips.kuban
+  user isp-user
+  password ascii-text encrypted 91A010
+  allowed-auth pap
+exit
+
+interface gigabitethernet 1/0/1
+  security-zone untrusted
+  switchport access vlan 2
+exit
+interface gigabitethernet 1/0/2
+  security-zone trusted
+  ip firewall disable
+exit
+interface gigabitethernet 1/0/3
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/4
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/5
+  security-zone trusted
+exit
+interface gigabitethernet 1/0/6
+  security-zone untrusted
+  switchport access vlan 2
+exit
+cellular modem 1
+  device 1-2
+  ip firewall disable
+  security-zone untrusted
+  profile 1
+  enable
+exit
+security zone-pair trusted untrusted
+  rule 1
+    action permit
+    match protocol any
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+security zone-pair trusted trusted
+  rule 1
+    action permit
+    match protocol any
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+security zone-pair trusted self
+  rule 1
+    action permit
+    match protocol tcp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port telnet
+    enable
+  exit
+  rule 10
+    action permit
+    match protocol tcp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port ssh
+    enable
+  exit
+  rule 20
+    action permit
+    match protocol icmp
+    match source-address any
+    match destination-address any
+    enable
+  exit
+  rule 30
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port dhcp_client
+    match destination-port dhcp_server
+    enable
+  exit
+  rule 40
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port any
+    match destination-port ntp
+    enable
+  exit
+exit
+security zone-pair untrusted self
+  rule 1
+    action permit
+    match protocol udp
+    match source-address any
+    match destination-address any
+    match source-port dhcp_server
+    match destination-port dhcp_client
+    enable
+  exit
+  rule 20
+    action permit
+    match protocol icmp
+    match source-address any
+    match destination-address any
+    enable
+  exit
+exit
+
+remote-access l2tp remote-workers
+  mtu 1450
+  authentication mode local
+  local-address ip-address 10.77.10.1
+  remote-address address-range 10.77.10.5-10.77.10.200
+  outside-address interface modem 1
+  dns-servers object-group l2tp_dns
+  security-zone untrusted
+  ipsec authentication method pre-shared-key
+  ipsec authentication pre-shared-key ascii-text encrypted 9FA10
+  username user01
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.19.0/24
+  exit
+  username user02
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.25.0/24
+  exit
+  username user03
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.16.0/24
+  exit
+  username user04
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.30.0/24
+  exit
+  username user05
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.17.0/24
+  exit
+  username user06
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.28.0/24
+  exit
+  username user07
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.23.0/24
+  exit
+  username user08
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.32.0/24
+  exit
+  username user09
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.21.0/24
+  exit
+  username user10
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.15.0/24
+  exit
+  username user11
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.26.0/24
+  exit
+  username user12
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.31.0/24
+  exit
+  username user13
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.20.0/24
+  exit
+  username user14
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.200.0/24
+  exit
+  username user15
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.8.0/24
+  exit
+  username user16
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.8.0/24
+  exit
+  username user17
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.8.0/24
+  exit
+  username user18
+    password ascii-text encrypted 8CB5107E
+    enable
+    remote network 172.20.8.0/24
+  exit
+  username user19
+    password ascii-text encrypted 8CB5107E
+    enable
+  exit
+  enable
+exit
+
+ip firewall sessions tcp-estabilished-timeout 3600
+
+nat source
+  ruleset factory
+    to zone untrusted
+    rule 10
+      description "replace 'source ip' by outgoing interface ip address"
+      match protocol any
+      match source-address any
+      match destination-address any
+      action source-nat interface
+      enable
+    exit
+  exit
+exit
+
+ip dhcp-server
+ip dhcp-server pool lan-pool
+  network 172.20.14.0/24
+  address-range 172.20.14.2-172.20.14.254
+  default-router 172.20.14.1
+exit
+
+ip route 0.0.0.0/0 interface modem 1
+
+ip ssh server
+ip ssh port 22
+
+ntp enable
+ntp broadcast-client enable
