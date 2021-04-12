@@ -1,0 +1,19 @@
+interface gigabitethernet 1/0/1
+  security-zone trusted
+  ip address 192.168.11.1/24
+exit
+
+# Each pool works in its own network
+ip dhcp-server
+ip dhcp-server pool LAN1
+  network 192.168.10.0/24
+  address-range 192.168.10.101-192.168.10.199
+  default-router 192.168.10.1
+  dns-server 192.168.10.15,192.168.10.20
+exit
+ip dhcp-server pool LAN2
+  network 192.168.11.0/24
+  address-range 192.168.11.20-192.168.11.239
+  default-router 192.168.11.1
+  dns-server 192.168.10.15,192.168.10.20
+exit

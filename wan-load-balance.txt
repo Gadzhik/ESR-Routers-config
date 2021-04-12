@@ -1,0 +1,32 @@
+wan load-balance target-list google
+   target 1
+     ip address 8.8.8.8
+     enable
+   exit
+exit
+
+# An example of a WAN reservation configuration, we can add also modem interfaces
+
+interface gigabitethernet 1/0/4
+   ip fi di
+   ip address 10.10.0.150/30
+   wan load-balance nexthop 10.10.0.149
+   wan load-balance target-list google
+   wan load-balance enable
+exit
+interface gigabitethernet 1/0/5
+   ip fi di
+   ip address 192.0.2.70/30
+   wan load-balance nexthop 192.0.2.69
+   wan load-balance target-list google
+   wan load-balance enable
+exit
+
+ip route 0.0.0.0/0 wan load-balance rule 1
+
+wan load-balance rule 1
+   failover
+   outbound interface gigabitethernet 1/0/1 2
+   outbound interface gigabitethernet 1/0/2
+   enable
+exit

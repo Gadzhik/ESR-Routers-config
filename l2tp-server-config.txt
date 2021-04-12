@@ -1,0 +1,32 @@
+# Sample L2TP server configuration
+
+object-group network user2
+  ip prefix 192.168.20.0/30
+  ip prefix 192.168.30.0/28
+exit
+remote-access l2tp remote-workers
+  description "L2TP_server"
+  authentication mode local
+  local-address ip-address 10.10.11.1
+  remote-address address-range 10.10.11.2-10.10.11.100
+  outside-address ip-address 192.168.1.200
+  security-zone VPN
+  ipsec authentication method pre-shared-key
+  ipsec authentication pre-shared-key ascii-text encrypted 8CB517005AFF
+  username user1
+    password ascii-text encrypted 8CB517005AFF2C
+    enable
+    remote network 192.168.10.0/24
+  exit
+  username user2
+    password ascii-text encrypted 8CB517005AFF2F
+    enable
+    remote networks user2
+  exit
+  username user3
+    password ascii-text encrypted 8CB517005AFF2E
+    enable
+    remote network 192.168.40.0/28
+  exit
+  enable
+exit

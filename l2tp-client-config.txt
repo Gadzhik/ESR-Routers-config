@@ -1,0 +1,10 @@
+# Sample L2TP client configuration
+
+tunnel l2tp 2
+  ip firewall disable
+  authentication method mschap-v2
+  username <login> password ascii-text <password>
+  remote address A.B.C.D
+  ipsec authentication method pre-shared-key
+  ipsec authentication pre-shared-key ascii-text encrypted 9FTY7887E
+  enable
